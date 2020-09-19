@@ -1,11 +1,11 @@
 <template>
   <div class="image-render__listing">
-    <template v-if="images.length">
+    <template v-if="images.length && !getError">
       <ImageCard :image="image" v-for="image in images" :key="image.name" />
     </template>
     <template v-else>
-      <md-empty-state md-icon="tv" md-label="No images found" v-if="!isLoading">
-        <md-button to="/" class="md-primary md-raised">Return to Home</md-button>
+      <md-empty-state md-icon="image_not_supported" :md-label="noResults" v-show="!isLoading">
+        <md-button @click="reload" class="md-primary md-raised">{{ returnLabel }}</md-button>
       </md-empty-state>
     </template>
   </div>
@@ -26,33 +26,42 @@ export default {
       default: false
     }
   },
+  data() {
+    return {
+      noResults: 'No images found or something goes wrong',
+      returnLabel: 'Refresh the page'
+    }
+  },
   computed: {
     ...mapGetters([
       'isLoading',
       'getImages',
-      'getFavorites'
+      'getFavorites',
+      'getError'
     ]),
     images() {
       return this.favorites ? this.getFavorites : this.getImages;
     }
   },
   methods: {
+    reload() {
+      window.location.reload();
+    },
     async loadImages() {
       // run spinner
-      console.log('run loader');
-      this.$store.dispatch('addLoading', true);
+      this.$store.commit('setLoading', true);
 
       // getting images
       await this.$store.dispatch('fetchImages');
 
-      console.log('images ready', this.images);
-
       // stop spinner
-      this.$store.dispatch('addLoading', false);
+      this.$store.commit('setLoading', false);
     }
   },
   beforeMount() {
-    console.log('beforeMount');
+    this.$store.commit('setFullScreen', false);
+    
+    // check for images before re-load 
     if (!this.images.length) {
       this.loadImages();
     }
@@ -64,7 +73,7 @@ export default {
 .image-render__listing {
   display: flex;
   flex-flow: wrap;  
-  justify-content: space-between;
+  justify-content: space-evenly;
   margin: 0 -12px;
 }
 </style>

@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import CONFIG from './../config';
 import API from './../api';
 
 Vue.use(Vuex);
@@ -11,7 +10,8 @@ const state = () => ({
   images: [],
   favorites: [],
   isFullScreen: false,
-  errorMsg: 'Something goes wrong'
+  savedFullScreenImg: false,
+  error: false
 });
 
 // getters
@@ -22,57 +22,59 @@ const getters = {
   getImages: (state) => {
     return state.images;
   },
+  getFavorites: (state) => {
+    return state.favorites;
+  },
   isFullScreen: (state) => {
     return state.isFullScreen;
+  },
+  getError: (state) => {
+    return state.error;
+  },
+  getSavedFullScreenImg: (state) => {
+    return state.savedFullScreenImg;
   }
 };
 
 // actions
 const actions = {
-  addLoading({ commit }, boolean) {
-    commit('setLoading', boolean);
-  },
-  addFullScreen({ commit }, boolean) {
-    commit('setFullScreen', boolean);
-  },
   fetchImages({ commit }) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
+
+      // fetch the default "list" endpoint for images list
       API.LIST.get('/list').then((res) => {
         const response = res.data;
         const images = [];
 
-        if (response.length) {
+        if (response.length) {          
           const processImages = async () => {
-            // console.log('process images', response);
-
+            // go through the images
             for (const item in response) {
               const image = response[item];
 
-              await API.IMAGE.get(`/${image.name}`).then((res) => {   
+              // since, there is no image url's we fetch the src data per image from the 'image' endpoint
+              await API.IMAGE.get(`/${image.name}`).then((res) => {
+                // load all the images and convert them to base64
                 const uint8Array = new Uint8Array(res.data);    
                 const binary = uint8Array.reduce((acc, i) => acc += String.fromCharCode.apply(null, [i]), '');    
                 const data = window.btoa( binary );
                 const src = `data:image/jpg;base64,${data}`;
 
-                // console.log('proccessed', image.name);
-
+                // collect ready images
                 images.push({ 
                   name: image.name, 
                   src,               
                   width: image.resolution.width,
-                  height: image.resolution.height
+                  height: image.resolution.height,
+                  favourite: image.favourite
                 });
               });
             }
 
-            // console.log('all images processed', images);
-
             if (images.length) {
+              commit('setFavorites', images);
               commit('setImages', images);
-              commit('setError', '');
-            } else {
-              commit('setImages', '');
-              commit('setError', 'Images load failed');
+              commit('setError', false);
             }
 
             resolve();
@@ -83,7 +85,8 @@ const actions = {
       }).catch((e) => {
         console.log('API has issues', e);
 
-        reject();
+        commit('setLoading', false);
+        commit('setError', true);
       });
     });
   }
@@ -91,20 +94,24 @@ const actions = {
 
 // mutations
 const mutations = {
-  setLoading(state, isLoading) {
-    state.isLoading = isLoading;
+  setLoading(state, boolean) {
+    state.isLoading = boolean;
   },
-  setFullScreen(state, isFullScreen) {
-    state.isFullScreen = isFullScreen;
+  setFullScreen(state, boolean) {
+    state.isFullScreen = boolean;
+  },
+  saveFullScreenImage(state, image) {
+    state.savedFullScreenImg = image;
   },
   setImages(state, images) {
     state.images = images;
   },
   setFavorites(state, images) {
+    images = images.filter(image => image.favourite);    
     state.favorites = images;
   },
-  setError(state, error) {
-    state.errorMsg = error;
+  setError(state, boolean) {
+    state.error = boolean;
   }
 };
 

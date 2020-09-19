@@ -34,9 +34,11 @@ export default {
 </script>
 
 <style lang="scss">
+#app {
+  min-width: 375px;
+}
 .image-render {
-  height: calc(100vh - 64px);
-  min-width: 480px;
+  height: calc(100vh - 64px);  
   padding: 24px;
 
   &--fullscreen {
@@ -52,7 +54,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2rem 0;
+    padding: 4rem 0;
   }
 }
 </style>

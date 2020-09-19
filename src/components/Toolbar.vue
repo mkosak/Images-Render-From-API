@@ -3,12 +3,12 @@
     <div class="md-toolbar-row">
       <div class="md-toolbar-section-start">
         <a to="/">
-          <span class="md-title">Images Render</span>
+          <span class="md-title">Lynxx</span>
         </a>
       </div>
       <div class="md-toolbar-section-end">
         <md-button to="/">Home</md-button>
-        <md-button to="/favorite">Favorite Views</md-button>
+        <md-button to="/favorites">Favorite Views</md-button>
       </div>
     </div>
   </md-toolbar>

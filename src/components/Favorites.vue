@@ -1,5 +1,5 @@
 <template>
-  <ImagesList favorites="true" />
+  <ImagesList :favorites="favorites" />
 </template>
 
 <script>
@@ -9,6 +9,11 @@ export default {
   name: 'Favorites',
   components: {
     ImagesList
+  },
+  data() {
+    return {
+      favorites: true
+    }
   }
 }
 </script>

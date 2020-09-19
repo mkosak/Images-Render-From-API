@@ -6,8 +6,8 @@ const CONFIG = Object.freeze({
   'API_URL': 'https://portal-tb.lynxx.co/api-test/image/',
   'ROUTES': [
     { path: '/', component: Home },
-    { path: '/favorite', component: Favorites },
-    { path: '/image/:id', component: ImagePage, query: { image: {} } }
+    { path: '/favorites', component: Favorites },
+    { path: '/image/:id', component: ImagePage }
   ]
 });
 
