@@ -4,6 +4,8 @@ import Vuex from 'vuex';
 import VueMaterial from 'vue-material';
 
 import store from './store';
+import CONFIG from './config';
+import App from './App.vue';
 
 import 'vue-material/dist/vue-material.min.css';
 import 'vue-material/dist/theme/default.css';
@@ -14,14 +16,10 @@ Vue.use(VueRouter);
 Vue.use(Vuex);
 Vue.use(VueMaterial);
 
-import CONFIG from './config';
-
 const router = new VueRouter({
   routes: CONFIG.ROUTES,
   mode: 'history'
 });
-
-import App from './App.vue';
 
 new Vue({
   render: h => h(App),
