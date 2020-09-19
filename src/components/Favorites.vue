@@ -1,12 +1,12 @@
 <template>
-  <ImagesList />
+  <ImagesList favorites="true" />
 </template>
 
 <script>
 import ImagesList from './ImagesList.vue';
 
 export default {
-  name: 'Home',
+  name: 'Favorites',
   components: {
     ImagesList
   }

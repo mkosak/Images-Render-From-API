@@ -1,12 +1,13 @@
 import Home from './components/Home.vue';
-import Results from './components/Results.vue';
+import Favorites from './components/Favorites.vue';
+import ImagePage from './components/ImagePage.vue';
 
 const CONFIG = Object.freeze({
-  'API_URL': 'http://www.omdbapi.com/',
-  'API_KEY': 'e656bd4b',
+  'API_URL': 'https://portal-tb.lynxx.co/api-test/image/',
   'ROUTES': [
     { path: '/', component: Home },
-    { path: '/results', component: Results }
+    { path: '/favorite', component: Favorites },
+    { path: '/image/:id', component: ImagePage, query: { image: {} } }
   ]
 });
 

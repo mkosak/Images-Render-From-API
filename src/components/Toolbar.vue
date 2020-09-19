@@ -1,14 +1,14 @@
 <template>
-  <md-toolbar class="md-primary movie-finder-toolbar">
+  <md-toolbar class="md-primary image-render-toolbar">
     <div class="md-toolbar-row">
       <div class="md-toolbar-section-start">
         <a to="/">
-          <span class="md-title">MovieFinder</span>
+          <span class="md-title">Images Render</span>
         </a>
       </div>
       <div class="md-toolbar-section-end">
         <md-button to="/">Home</md-button>
-        <md-button to="/results">Results</md-button>
+        <md-button to="/favorite">Favorite Views</md-button>
       </div>
     </div>
   </md-toolbar>
@@ -21,7 +21,7 @@ export default {
 </script>
 
 <style lang="scss">
-.movie-finder-toolbar .router-link-exact-active {
+.image-render-toolbar .router-link-exact-active {
   &:before {
     position: absolute;
     top: 0;

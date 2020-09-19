@@ -1,84 +1,91 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import API from './../api.js';
+import CONFIG from './../config';
+import API from './../api';
 
 Vue.use(Vuex);
-
-// localStorage helpers
-const saveToLocalStorage = (item, value) => {
-  let savedResults = getFromLocalStorage('searchResultsHistory') || [];
-  
-  savedResults.push(value);
-
-  localStorage.setItem(item, JSON.stringify(savedResults));
-};
-const getFromLocalStorage = (item) => {
-  let res = localStorage.getItem(item) ? JSON.parse(localStorage.getItem(item)) : false;
-
-  return res;
-};
 
 // initial state
 const state = () => ({
   isLoading: false,
-  form: {},
-  movies: [],
-  resultsHistory: [],
-  errorMsg: ''
+  images: [],
+  favorites: [],
+  isFullScreen: false,
+  errorMsg: 'Something goes wrong'
 });
 
 // getters
 const getters = {
-  getLoading: (state) => {
+  isLoading: (state) => {
     return state.isLoading;
   },
-  getSearchTerm: (state) => {
-    return state.form.searchTerm;
+  getImages: (state) => {
+    return state.images;
   },
-  getMovies: (state) => {
-    return state.movies;
-  },
-  getResultsHistory: (state) => {
-    // get results from store first otherwise load from localStorage
-    if (state.resultsHistory.lenght) {
-      return state.resultsHistory;
-    } else {
-      return getFromLocalStorage('searchResultsHistory');
-    }
-  },
-  getErrorMsg: (state) => {
-    return state.error;
+  isFullScreen: (state) => {
+    return state.isFullScreen;
   }
 };
 
 // actions
 const actions = {
-  addLoading({ commit }, isLoading) {
-    commit('setLoading', isLoading);
+  addLoading({ commit }, boolean) {
+    commit('setLoading', boolean);
   },
-  addForm({ commit }, form) {
-    commit('setForm', form);
+  addFullScreen({ commit }, boolean) {
+    commit('setFullScreen', boolean);
   },
-  async searchMovies({ commit }, term) {
-    await API.get(`?s=${term}`).then((res) => {
-      if (res.data.Search) {
-        commit('setMovies', res.data.Search);
-        commit('setError', '');
-      } else {
-        commit('setMovies', '');
-        commit('setError', res.data.Error);
-      }
-    }).catch((e) => {
-      console.log('API has issues', e);
-    });
-  },
-  addResultsHistory({ commit, getters }, results) {
-    if (!results.length) return;
+  fetchImages({ commit }) {
+    return new Promise((resolve, reject) => {
+      API.LIST.get('/list').then((res) => {
+        const response = res.data;
+        const images = [];
 
-    commit('setResultsHistory', { term: getters.getSearchTerm, results });
-  },
-  addMoveis({ commit }, movies) {
-    commit('setMovies', movies);
+        if (response.length) {
+          const processImages = async () => {
+            // console.log('process images', response);
+
+            for (const item in response) {
+              const image = response[item];
+
+              await API.IMAGE.get(`/${image.name}`).then((res) => {   
+                const uint8Array = new Uint8Array(res.data);    
+                const binary = uint8Array.reduce((acc, i) => acc += String.fromCharCode.apply(null, [i]), '');    
+                const data = window.btoa( binary );
+                const src = `data:image/jpg;base64,${data}`;
+
+                // console.log('proccessed', image.name);
+
+                images.push({ 
+                  name: image.name, 
+                  src,               
+                  width: image.resolution.width,
+                  height: image.resolution.height
+                });
+              });
+            }
+
+            // console.log('all images processed', images);
+
+            if (images.length) {
+              commit('setImages', images);
+              commit('setError', '');
+            } else {
+              commit('setImages', '');
+              commit('setError', 'Images load failed');
+            }
+
+            resolve();
+          };
+
+          processImages();
+        }
+      }).catch((e) => {
+        console.log('API has issues', e);
+
+        reject();
+      });
+    });
   }
 };
 
@@ -87,18 +94,14 @@ const mutations = {
   setLoading(state, isLoading) {
     state.isLoading = isLoading;
   },
-  setForm(state, form) {
-    state.form = Object.assign({}, state.form, form);
+  setFullScreen(state, isFullScreen) {
+    state.isFullScreen = isFullScreen;
   },
-  setMovies(state, movies) {
-    state.movies = movies;
+  setImages(state, images) {
+    state.images = images;
   },
-  setResultsHistory(state, history) {
-    const results = { term: history.term, results: history.results };
-    state.resultsHistory.push(results);
-
-    // save results to localStorage
-    saveToLocalStorage('searchResultsHistory', results);
+  setFavorites(state, images) {
+    state.favorites = images;
   },
   setError(state, error) {
     state.errorMsg = error;

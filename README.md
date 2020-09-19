@@ -1,4 +1,4 @@
-# movie-finder
+# image-renderer
 
 ## Project setup
 ```

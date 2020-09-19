@@ -1,35 +1,58 @@
 <template>
   <div id="app">
-    <Toolbar />
+    <Toolbar v-show="!isFullScreen" />
 
-    <div>
-      <md-app class="movie-finder-container">
-        <md-app-content>
-          <router-view></router-view>
-        </md-app-content>
-      </md-app>
-    </div>
+    <keep-alive exclude="ImagePage">
+      <div class="image-render" :class="{ 'image-render--fullscreen': isFullScreen }">
+        <div class="image-render__spinner" v-show="isLoading">
+          <md-progress-spinner :md-diameter="100" :md-stroke="10" md-mode="indeterminate"></md-progress-spinner>
+        </div>
+
+        <router-view v-show="!isLoading"></router-view>
+      </div>
+    </keep-alive>
   </div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+import ImagePage from './components/ImagePage';
 import Toolbar from './components/Toolbar';
 
 export default {
   name: 'App',
   components: {
     Toolbar
+  },
+  computed: {
+    ...mapGetters([
+      'isLoading',
+      'isFullScreen'
+    ])
   }
 }
 </script>
 
 <style lang="scss">
-.movie-finder-container {
+.image-render {
   height: calc(100vh - 64px);
   min-width: 480px;
+  padding: 24px;
+
+  &--fullscreen {
+    padding: 0;
+    height: 100%;
+  }
 
   @media (max-width: 960px) {
     height: calc(100vh - 48px);
+  }
+
+  &__spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 0;
   }
 }
 </style>
